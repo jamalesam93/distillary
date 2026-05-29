@@ -153,6 +153,8 @@ The orchestrator reads the same `.claude/agents/*.md` prompt files as the origin
 
 Run the pipeline with **zero API keys** through an active [Antigravity](https://antigravity.ai) session. The orchestration spawns native subagents — no billing, no rate limits beyond your subscription.
 
+→ **[Full hands-on tutorial: Using Distillary with Antigravity](docs/guides/antigravity.md)**
+
 This was built to solve a real constraint: Gemini's free API tier hits limits before finishing a single book. The Antigravity path bypasses that entirely.
 
 ### What's unchanged
