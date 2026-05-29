@@ -7,6 +7,7 @@ __pycache__/
 
 # Source files (don't commit copyrighted content)
 books/
+my books/
 
 # Temporary pipeline files
 tmp/

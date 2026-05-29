@@ -76,25 +76,34 @@ def _extract_epub(path: Path) -> str:
 
 
 def _extract_pdf(path: Path) -> str:
-    """Extract text from PDF via LangChain's community loader.
-
-    Returns the text and detects scanned/image-based PDFs by checking
-    if the extracted text is too short relative to page count.
-    """
-    from langchain_community.document_loaders import PyPDFLoader
-
-    docs = PyPDFLoader(str(path)).load()
-    text = "\n\n".join(doc.page_content for doc in docs)
-
-    # Detect scanned PDFs: if text per page is very low, it's likely image-based
-    if docs and len(text.strip()) < len(docs) * 100:
-        raise ScannedPDFError(
-            page_count=len(docs),
-            extracted_chars=len(text.strip()),
-            path=path,
-        )
-
-    return text
+    """Extract text from PDF via pypdfium2 or fallback to PyPDFLoader."""
+    try:
+        import pypdfium2 as pdfium
+        doc = pdfium.PdfDocument(str(path))
+        text = ""
+        for page in doc:
+            textpage = page.get_textpage()
+            text += textpage.get_text_bounded() + "\n"
+        
+        # Check scanned PDF
+        if doc and len(text.strip()) < len(doc) * 100:
+            raise ScannedPDFError(
+                page_count=len(doc),
+                extracted_chars=len(text.strip()),
+                path=path,
+            )
+        return text
+    except ImportError:
+        from langchain_community.document_loaders import PyPDFLoader
+        docs = PyPDFLoader(str(path)).load()
+        text = "\n\n".join(doc.page_content for doc in docs)
+        if docs and len(text.strip()) < len(docs) * 100:
+            raise ScannedPDFError(
+                page_count=len(docs),
+                extracted_chars=len(text.strip()),
+                path=path,
+            )
+        return text
 
 
 class ScannedPDFError(Exception):
